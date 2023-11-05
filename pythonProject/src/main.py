@@ -7,9 +7,22 @@ import json
 
 data = json.load(open("data.json", "r"))
 print(data)
+keys=list(data.keys())
+print(keys)
 
 
-###############################menu################################
+def check_user(id):
+    if id in keys:
+        return True
+    return False
+
+# def reset_data(data,type="initial"):
+#     data["index"] = -1
+#     data["type"] = type
+#     data["data"] = []
+#
+
+##########################callback handlers#################################
 async def main_menu(update, context):
     query = update.callback_query
     await query.answer()
@@ -32,9 +45,6 @@ async def second_menu(update, context):
     await query.edit_message_text(
         text=second_menu_message(),
         reply_markup=second_menu_keyboard())
-
-##########################callback handlers#################################
-
 
 
 async def Syriatel_deposite(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -110,6 +120,16 @@ async def refuse(update, context):
     await query.edit_message_text(
         text="تم اعلام المستخدم"
     )
+async def Send_money(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["index"] = -1
+    context.user_data["type"] = "send_money"
+    context.user_data["data"] = []
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text(
+        text= "ارسل ايدي التلغرام للشخص المراد اهداء الرصيد اليه \n يمكن الحصول على الايدي عن طريق ضغط زر  رصيدي"
+    )
+
 
 
 ############################ Keyboards #########################################
@@ -265,6 +285,25 @@ async def test_massege(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("تم ارسال الطلب للادمن يرجى انتظار الموافقة")
             return
         await update.message.reply_text("ادخل القيمة المحولة ")
+    elif context.user_data["type"] == "send_money":
+        context.user_data["index"] += 1
+        t1 = update.message.text
+        context.user_data["data"].insert(context.user_data["index"], t1)
+        if context.user_data["index"] == 0:
+            if t1 not in keys:
+                await update.message.reply_text("لا يوجد مستخدم في البوت بهذا الايدي  ❌ ")
+                context.user_data["index"] -= 1
+                return
+            await update.message.reply_text("ادخل القيمة التي تريد اهدائها ")
+        if context.user_data["index"] == 1:
+            await context.bot.send_message(chat_id=645706695, reply_markup=card(),
+                                           text="🔴 لديك طلب شحن رصيد في البوت عن طريق Payeer" +
+                                                f"\n عنوان المحفظة المرسل منها {context.user_data['data'][0]}" +
+                                                f"\n القيمة المحولة {context.user_data['data'][1]} $" +
+                                                f"\n معرف الزبون {update.effective_user.id}")
+            await update.message.reply_text("تم ارسال الطلب للادمن يرجى انتظار الموافقة")
+            return
+
 
 
 
@@ -279,6 +318,7 @@ if __name__ == '__main__':
     app.add_handler(CallbackQueryHandler(main_menu, pattern='main'))
     app.add_handler(CallbackQueryHandler(first_menu, pattern='m1'))
     app.add_handler(CallbackQueryHandler(second_menu, pattern='m2'))
+    app.add_handler(CallbackQueryHandler(Send_money, pattern='m4'))
     app.add_handler(CallbackQueryHandler(Syriatel_deposite, pattern='d1'))
     app.add_handler(CallbackQueryHandler(Mtn_deposite, pattern='d2'))
     app.add_handler(CallbackQueryHandler(Bemo_deposite, pattern='d3'))
