@@ -1,6 +1,6 @@
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, MessageHandler, CallbackQueryHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from test import check_syriatel
+# from test import check_syriatel
 
 token = "6537607035:AAGtrtqlOlGUfzQ0lZT70bglNT-wpR_3Hp8"
 import json
@@ -356,7 +356,7 @@ async def test_massege(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text("ان اقل قيمة للشحن هي 5000 الرجاء اعادة ادخال القيمة 👇")
                 context.user_data["index"] -= 1
                 return
-            check = check_syriatel()
+            check = []#check_syriatel()
             list = [context.user_data["data"][0], context.user_data["data"][1], 'نجاح']
             if list in check:
                 await update.message.reply_text("تم اضافة رصيد للبوت")
